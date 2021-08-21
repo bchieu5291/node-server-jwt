@@ -1,0 +1,31 @@
+
+POST  http://localhost:4000/api/auth/register
+Content-Type: application/json
+
+{
+    "username": "george7",
+    "password": "dev123@"
+}
+
+###
+
+POST  http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+    "username": "george",
+    "password": "dev123@"
+}
+
+###
+POST  http://localhost:5000/token
+ Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJnZW9yZ2UiLCJpYXQiOjE2MjkzODYwMDEsImV4cCI6MTYyOTM4OTYwMX0.ha_3cZZzraWX76zpKGSqkqObYrOqt7l53yeYGyLEui4"
+}
+
+###
+DELETE  http://localhost:5000/logout
+ Content-Type: application/json
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJnZW9yZ2UiLCJpYXQiOjE2MjkzODYwMDEsImV4cCI6MTYyOTM4NjMwMX0.iunvDHqGyFMNMxTLlAXmbNZclDe8Sd43xtdTLdPHVTo

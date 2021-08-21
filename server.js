@@ -1,30 +1,55 @@
-require('dotenv').config()
-const express = require('express')
-const jwt =  require('jsonwebtoken');
-const app = express()
-const verifyToken = require('./middleware/auth')
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const verifyToken = require("./middleware/auth");
+const authRouter = require("./routes/authServer");
+const postRouter = require("./routes/post");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
+const connectDB = async () => {
+    try {
+        await mongoose.connect(
+            `mongodb+srv://george:dev123@@mern-george.ohcow.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+            {
+                useCreateIndex: true,
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                useFindAndModify: false,
+            }
+        );
+
+        console.log("MongoDB connected");
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+};
+connectDB();
 
 app.use(express.json());
+app.use(cors());
 
 //database
 const posts = [
     {
         userId: 1,
-        post: "post henry"
+        post: "post henry",
     },
     {
         userId: 2,
-        post: "post george"
-    }
-]
-
+        post: "post george",
+    },
+];
 
 //app
-app.get('/posts', verifyToken, (req, res) => {
-    res.json(posts.filter(post => post.userId === req.userId))
-})
+app.get("/posts", verifyToken, (req, res) => {
+    res.json(posts.filter((post) => post.userId === req.userId));
+});
 
-const PORT = process.env.PORT || 4000
+app.use("/api/auth", authRouter);
+app.use("/api/posts", postRouter);
 
-app.listen(PORT, () => console.log(`server start on port ${PORT}`))
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => console.log(`server start on port ${PORT}`));

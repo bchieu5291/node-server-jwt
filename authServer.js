@@ -2,7 +2,29 @@ require('dotenv').config()
 const express = require('express')
 const jwt =  require('jsonwebtoken');
 const app = express()
+const router = express.Router
 const verifyToken = require('./middleware/auth')
+const mongoose =  require('mongoose');
+const User = require('./models/User');
+const argon2 = require('argon2')
+
+const connectDB = async() => {
+    try {
+        await mongoose.connect(`mongodb+srv://george:dev123@@mern-george.ohcow.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`, {
+            useCreateIndex: true,
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false
+        })
+        
+        console.log("MongoDB connected")
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+}
+
+connectDB();
 
 app.use(express.json());
 
@@ -21,13 +43,13 @@ let users = [
 
 const generateTokens = payload => {
 
-    const {id, username} = payload;
+    const {_id, username} = payload;
     
-    const accessToken = jwt.sign({id, username}, process.env.ACCESS_TOKEN_SECRET, {
+    const accessToken = jwt.sign({_id, username}, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '5m'
     })
 
-    const refreshToken = jwt.sign({id, username}, process.env.REFESH_TOKEN_SECRET, {
+    const refreshToken = jwt.sign({_id, username}, process.env.REFESH_TOKEN_SECRET, {
         expiresIn: '1h'
     })
 
@@ -35,20 +57,68 @@ const generateTokens = payload => {
 }
 
 //app
-app.post('/login', (req, res) => {
-    const username = req.body.username;
-    const user = users.find(user => user.username === username)
+app.post('/register', async(req, res) => {
+    const {username, password} = req.body;
     
-    if(!user){
-        return res.sendStatus(401)
+    if(!username || !password){
+        return res.status(400).json({success: false, message: 'Missing user/password'})
     }
 
-    //create JWT
-    const tokens = generateTokens(user);
-    updateRefreshToken(username, tokens.refreshToken);
+    try {
+        //check exist user
+        const user = await User.findOne({username})
 
-    console.log(user);
-    res.json({tokens});
+        if (user) return res.status(400).json({success: false, message: 'Username already exist'})
+        
+        //create
+        const hashedPassword = await argon2.hash(password)
+        const newUser = new User({username, password: hashedPassword})
+        await newUser.save();
+
+        //Return token
+        //create JWT
+        const tokens = generateTokens(newUser);
+        updateRefreshToken(username, tokens.refreshToken);
+
+        console.log(newUser);
+        res.json({success: true, message:"user created successfully", data: tokens});
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({success: false, message: 'General error'})
+    }
+})
+
+app.post('/login', async(req, res) => {
+    const {username, password} = req.body;
+    
+    if(!username || !password){
+        return res.status(400).json({success: false, message: 'Missing user/password'})
+    }
+
+    try {
+        const user = await User.findOne({username})
+        if (!user) return res.status(400).json({success: false, message: 'Incorrect username/password'})
+
+        const passwordValid = await argon2.verify(user.password, password)
+        if(!passwordValid) return res.status(400).json({success: false, message: 'Incorrect username/password'})
+
+        //create JWT
+        const tokens = generateTokens(user);
+        updateRefreshToken(username, tokens.refreshToken);
+
+        return res.json({success: true, message:"Login successfully", data: tokens});
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({success: false, message: 'General error'})
+    }
+
+    
+    
+    
+
+  
 })
 
 const updateRefreshToken = (username, refreshToken) => {
