@@ -4,7 +4,9 @@ const app = express();
 const verifyToken = require("./middleware/auth");
 const authRouter = require("./routes/authServer");
 const postRouter = require("./routes/post");
+const newsRouter = require("./routes/news");
 const mongoose = require("mongoose");
+var bodyParser = require("body-parser");
 const cors = require("cors");
 
 const connectDB = async () => {
@@ -27,6 +29,7 @@ const connectDB = async () => {
 };
 connectDB();
 
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
@@ -49,6 +52,7 @@ app.get("/posts", verifyToken, (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/posts", postRouter);
+app.use("/api/news", newsRouter);
 
 const PORT = process.env.PORT || 4000;
 
