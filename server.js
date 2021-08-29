@@ -12,7 +12,7 @@ const cors = require("cors");
 const connectDB = async () => {
     try {
         await mongoose.connect(
-            `mongodb+srv://george:dev123@@mern-george.ohcow.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+            `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@mern-george.ohcow.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
             {
                 useCreateIndex: true,
                 useNewUrlParser: true,
@@ -44,6 +44,10 @@ const posts = [
         post: "post george",
     },
 ];
+
+app.get("/", (req, res) =>
+    res.json(process.env.MONGO_DB_USER ? `${process.env.MONGO_DB_USER}` : "can't get mongoDB")
+);
 
 //app
 app.get("/posts", verifyToken, (req, res) => {

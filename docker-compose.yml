@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+    react-ts-be-image:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: react-ts-be-container
+        ports:
+            - "4001:4000"
