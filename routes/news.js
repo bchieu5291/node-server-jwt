@@ -81,7 +81,7 @@ router.post("/", profileImage.array("imageFile"), async (req, res) => {
 
 //@PUT
 //@access private
-router.put("/:id", upload.array("imageFile"), async (req, res) => {
+router.put("/:id", profileImage.array("imageFile"), async (req, res) => {
     const { title, description, url, status } = req.body;
 
     if (!title) {
@@ -93,10 +93,8 @@ router.put("/:id", upload.array("imageFile"), async (req, res) => {
         if (req.files.length > 0) {
             imageReq = new Image({
                 name: req.files[0].originalname,
-                imagebase64: fs
-                    .readFileSync(path.join(__dirname, "..", "/uploads/" + req.files[0].filename))
-                    .toString("base64"),
-                extension: req.files[0].mimetype,
+                imageUrl: `${req.files[0].original.Location}`,
+                extension: req.files[0].original.ContentType,
                 size: req.files[0].size,
             });
         }
@@ -121,7 +119,7 @@ router.put("/:id", upload.array("imageFile"), async (req, res) => {
         });
 
         const result = await News.findOne({ _id: updatedNews._id }).populate("imageFile", [
-            "imagebase64",
+            "imageUrl",
         ]);
 
         //Post not found
