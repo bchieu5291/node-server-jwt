@@ -6,6 +6,7 @@ var imageSchema = new mongoose.Schema({
     extension: String,
     size: Number,
     imagebase64: String,
+    imageUrl: String,
 });
 
 //Image is a model which has a schema imageSchema

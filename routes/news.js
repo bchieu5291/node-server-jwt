@@ -10,6 +10,8 @@ const ImageModel = require("../models/Image");
 var multer = require("multer");
 const Image = require("../models/Image");
 
+const { profileImage } = require("../awss3/upload");
+
 var storage = multer.diskStorage({
     destination: "./uploads",
     filename: (req, file, cb) => {
@@ -22,7 +24,7 @@ var upload = multer({ storage: storage });
 //@access private
 router.get("/", async (req, res) => {
     try {
-        const news = await News.find({}).populate("imageFile", ["imagebase64"]);
+        const news = await News.find({}).populate("imageFile", ["imageUrl"]);
 
         res.json({ success: true, news: news });
     } catch (error) {
@@ -33,7 +35,7 @@ router.get("/", async (req, res) => {
 
 //@POST
 //@access private
-router.post("/", upload.array("imageFile"), async (req, res) => {
+router.post("/", profileImage.array("imageFile"), async (req, res) => {
     const { title, description, url, status } = req.body;
 
     try {
@@ -42,10 +44,8 @@ router.post("/", upload.array("imageFile"), async (req, res) => {
 
         var imageReq = {
             name: req.files[0].originalname,
-            imagebase64: fs
-                .readFileSync(path.join(__dirname, "..", "/uploads/" + req.files[0].filename))
-                .toString("base64"),
-            extension: req.files[0].mimetype,
+            imageUrl: `${req.files[0].original.Location}`,
+            extension: req.files[0].original.ContentType,
             size: req.files[0].size,
         };
 
@@ -64,7 +64,7 @@ router.post("/", upload.array("imageFile"), async (req, res) => {
 
                 await news.save();
                 const result = await News.findOne({ _id: news._id }).populate("imageFile", [
-                    "imagebase64",
+                    "imageUrl",
                 ]);
                 res.json({
                     success: true,

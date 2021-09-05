@@ -8,6 +8,7 @@ const newsRouter = require("./routes/news");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 const cors = require("cors");
+const AWS = require("aws-sdk");
 
 const connectDB = async () => {
     try {
