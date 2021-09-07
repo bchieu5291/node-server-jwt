@@ -32,18 +32,19 @@ const fileFilter = (req, file, cb) => {
 const storageSharp = s3Storage({
     s3: s3Config,
     Bucket: process.env.AWS_BUCKET_NAME,
-    // Key: function (req, file, cb) {
-    //     cb(null, `400_400/${new Date().toISOString()}-${file.originalname}_400x400`);
-    // },
-    Key: (req, file, cb) => {
-        crypto.pseudoRandomBytes(16, (err, raw) => {
-            cb(err, err ? undefined : raw.toString("hex"));
-        });
+    Key: function (req, file, cb) {
+        cb(null, `${file.originalname.replace(".png", "").replace(".jpg", "")}`);
     },
+    // Key: (req, file, cb) => {
+    //     crypto.pseudoRandomBytes(16, (err, raw) => {
+    //         cb(err, err ? undefined : raw.toString("hex"));
+    //     });
+    // },
     ACL: "private",
     multiple: true,
     resize: [
         // { suffix: "xlg", width: 1200, height: 1200 },
+        { suffix: "banner", width: 1920, height: 550 },
         { suffix: "firstNews", width: 1106, height: 514 },
         { suffix: "restNews", width: 473, height: 220 },
         { suffix: "original" },
@@ -69,4 +70,4 @@ const upload = multer({
     },
 });
 
-exports.profileImage = upload;
+exports.resizeImageNews = upload;

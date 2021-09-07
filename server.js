@@ -5,6 +5,7 @@ const verifyToken = require("./middleware/auth");
 const authRouter = require("./routes/authServer");
 const postRouter = require("./routes/post");
 const newsRouter = require("./routes/news");
+const resizeImage = require("./routes/resizeImage");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 const cors = require("cors");
@@ -58,6 +59,7 @@ app.get("/posts", verifyToken, (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/news", newsRouter);
+app.use("/api/resizeImage", resizeImage);
 
 const PORT = process.env.PORT || 4000;
 

@@ -12,13 +12,13 @@ const Image = require("../models/Image");
 
 const { profileImage } = require("../awss3/upload");
 
-var storage = multer.diskStorage({
-    destination: "./uploads",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    },
-});
-var upload = multer({ storage: storage });
+// var storage = multer.diskStorage({
+//     destination: "./uploads",
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + "-" + file.originalname);
+//     },
+// });
+// var upload = multer({ storage: storage });
 
 //@GET
 //@access private
