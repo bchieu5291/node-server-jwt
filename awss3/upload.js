@@ -44,8 +44,11 @@ const storageSharp = s3Storage({
     multiple: true,
     resize: [
         // { suffix: "xlg", width: 1200, height: 1200 },
+        { suffix: "banner", width: 1920, height: 550 },
         { suffix: "firstNews", width: 1106, height: 514 },
         { suffix: "restNews", width: 473, height: 220 },
+        { suffix: "detail", width: 1024, height: 573 },
+        { suffix: "related", width: 500, height: 300 },
         { suffix: "original" },
     ],
 });

@@ -65,7 +65,7 @@ router.get("/", async (req, res) => {
 
         const options = {
             method: "POST",
-            url: "http://localhost:4000/api/resizeImage",
+            url: `http://${req.headers.host}/api/resizeImage`,
             headers: {
                 "Content-Type": "multipart/form-data",
             },
