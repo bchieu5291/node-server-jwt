@@ -6,11 +6,13 @@ var path = require("path");
 
 const News = require("../models/News");
 const ImageModel = require("../models/Image");
+const Classification = require("../models/classification");
 
 var multer = require("multer");
 const Image = require("../models/Image");
 
 const { profileImage } = require("../awss3/upload");
+const classification = require("../models/classification");
 
 // var storage = multer.diskStorage({
 //     destination: "./uploads",
@@ -24,7 +26,9 @@ const { profileImage } = require("../awss3/upload");
 //@access private
 router.get("/", async (req, res) => {
     try {
-        const news = await News.find({}).populate("imageFile", ["imageUrl"]);
+        const news = await News.find({})
+            .populate("imageFile", ["imageUrl"])
+            .populate("classifications", ["title"]);
 
         res.json({ success: true, news: news });
     } catch (error) {
@@ -36,7 +40,7 @@ router.get("/", async (req, res) => {
 //@POST
 //@access private
 router.post("/", profileImage.array("imageFile"), async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title, description, url, classifications } = req.body;
 
     try {
         // console.log("success");
@@ -59,13 +63,22 @@ router.post("/", profileImage.array("imageFile"), async (req, res) => {
                     title,
                     description,
                     url: url.startsWith("http://") ? url : `http://${url}`,
+                    classifications: classifications.split(","),
                     imageFile: item._id,
                 });
 
                 await news.save();
-                const result = await News.findOne({ _id: news._id }).populate("imageFile", [
-                    "imageUrl",
-                ]);
+
+                //update classification
+                await Classification.updateMany(
+                    { _id: news.classifications },
+                    { $push: { news: news._id } }
+                );
+
+                const result = await News.findOne({ _id: news._id })
+                    .populate("imageFile", ["imageUrl"])
+                    .populate("classifications", ["title"]);
+
                 res.json({
                     success: true,
                     message: "Successs",
@@ -82,8 +95,9 @@ router.post("/", profileImage.array("imageFile"), async (req, res) => {
 //@PUT
 //@access private
 router.put("/:id", profileImage.array("imageFile"), async (req, res) => {
-    const { title, description, url, status } = req.body;
+    const { title, description, url, classifications } = req.body;
 
+    const classificationArray = classifications !== "" ? classifications.split(",") : [];
     if (!title) {
         return res.status(400).json({ success: false, message: "Title is required" });
     }
@@ -99,6 +113,12 @@ router.put("/:id", profileImage.array("imageFile"), async (req, res) => {
             });
         }
 
+        const oldNews = await News.findOne({ _id: req.params.id });
+        const oldClassifications =
+            oldNews.classifications.length > 0
+                ? oldNews.classifications.map((t) => t._id.toString())
+                : [];
+
         let updatedNews = {
             title,
             description,
@@ -113,14 +133,24 @@ router.put("/:id", profileImage.array("imageFile"), async (req, res) => {
             };
         }
 
+        updatedNews = {
+            ...updatedNews,
+            classifications: classificationArray,
+        };
+
         const postUpdateCondition = { _id: req.params.id };
         updatedNews = await News.findOneAndUpdate(postUpdateCondition, updatedNews, {
             new: true,
         });
 
-        const result = await News.findOne({ _id: updatedNews._id }).populate("imageFile", [
-            "imageUrl",
-        ]);
+        const added = difference(classificationArray, oldClassifications);
+        const removed = difference(oldClassifications, classificationArray);
+        await Classification.updateMany({ _id: added }, { $addToSet: { news: oldNews._id } });
+        await Classification.updateMany({ _id: removed }, { $pull: { news: oldNews._id } });
+
+        const result = await News.findOne({ _id: updatedNews._id })
+            .populate("imageFile", ["imageUrl"])
+            .populate("classifications", ["title"]);
 
         //Post not found
         if (!updatedNews) {
@@ -142,6 +172,11 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
         const deletedNews = await News.findOneAndDelete(postdDeleteCondition);
 
+        await Classification.updateMany(
+            { _id: deletedNews.classifications },
+            { $pull: { news: deletedNews._id } }
+        );
+
         // //user not author to update post
         // if (!deletedPost) {
         //     return res.status(401).json({
@@ -156,5 +191,19 @@ router.delete("/:id", verifyToken, async (req, res) => {
         return res.status(400).json({ success: false, message: "General error" });
     }
 });
+
+function difference(A, B) {
+    const arrA = Array.isArray(A) ? A.map((x) => x.toString()) : [A.toString()];
+    const arrB = Array.isArray(B) ? B.map((x) => x.toString()) : [B.toString()];
+
+    const result = [];
+    for (const p of arrA) {
+        if (arrB.indexOf(p) === -1) {
+            result.push(p);
+        }
+    }
+
+    return result;
+}
 
 module.exports = router;

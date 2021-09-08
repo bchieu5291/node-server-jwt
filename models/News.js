@@ -16,6 +16,7 @@ const NewsSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "image",
     },
+    classifications: [{ type: mongoose.Types.ObjectId, ref: "classifications" }],
     createAt: {
         type: Date,
         default: Date.now,
