@@ -9,8 +9,10 @@ Content-Type: application/json
 
 ###
 
-GET  http://localhost:4000/api/posts
-Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDZhZjNjNGJlYzcwZThlZjc5MDIiLCJ1c2VybmFtZSI6Imdlb3JnZTQiLCJpYXQiOjE2Mjk1MjMzNjAsImV4cCI6MTYyOTUyMzY2MH0.hDImB8qqd12MTTnAmaTQyVmc5OZHypJKOGFxpu3BHh0
+GET  http://localhost:4000/api/news?title=test&classifications=606563248d90d1833f3cda0b
+
+###
+GET  http://localhost:4000/api/news?title=&classifications=&start=0&length=3
 
 ###
 PUT  http://localhost:4000/api/posts/61208b0437f69642601e5d41

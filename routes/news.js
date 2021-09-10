@@ -13,6 +13,7 @@ const Image = require("../models/Image");
 
 const { profileImage } = require("../awss3/upload");
 const classification = require("../models/classification");
+const { default_limit } = require("../ultilities/constUtil");
 
 // var storage = multer.diskStorage({
 //     destination: "./uploads",
@@ -26,9 +27,30 @@ const classification = require("../models/classification");
 //@access private
 router.get("/", async (req, res) => {
     try {
-        const news = await News.find({})
-            .populate("imageFile", ["imageUrl"])
-            .populate("classifications", ["title"]);
+        const { title, classifications, page, length } = req.query;
+
+        var query = {};
+        var payload = {
+            title: title || "",
+            classifications: classifications ? classifications.split(",") : null,
+        };
+        if (payload.title) query.title = { $regex: payload.title };
+        if (payload.classifications) query.classifications = { $in: payload.classifications };
+
+        var populateOptions = [
+            { path: "imageFile", select: "imageUrl" },
+            { path: "classifications", select: "title" },
+        ];
+
+        var options = {
+            populate: populateOptions,
+            offset: page && parseInt(page) > 0 ? (page - 1) * default_limit : 0,
+            limit: length && parseInt(length) != 0 ? length : default_limit,
+        };
+
+        const news = await News.paginate(query, options);
+        // .populate("imageFile", ["imageUrl"])
+        // .populate("classifications", ["title"]);
 
         res.json({ success: true, news: news });
     } catch (error) {
