@@ -44,8 +44,9 @@ router.get("/", async (req, res) => {
 
         var options = {
             populate: populateOptions,
-            offset: page && parseInt(page) > 0 ? (page - 1) * default_limit : 0,
-            limit: length && parseInt(length) != 0 ? length : default_limit,
+            sort: { createAt: -1 },
+            page: page && parseInt(page) > 0 ? page : 0,
+            limit: length && parseInt(length) != 0 ? parseInt(length) : default_limit,
         };
 
         const news = await News.paginate(query, options);
