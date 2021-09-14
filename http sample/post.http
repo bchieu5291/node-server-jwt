@@ -1,9 +1,9 @@
 POST  http://localhost:4000/api/posts
-Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYyOTU2MzkwNywiZXhwIjoxNjI5NTY1NzA3fQ.kcFuQ_oFwhEO7AgNWGqnGV6RLp91JEpsekEvHe_S0Eo
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTQ2MDk2MiwiZXhwIjoxNjMxNDYyNzYyfQ.n4ZwcMv-2qqgkfRbCif8GXqkFNcgdiucvOunlagFdcs
 Content-Type: application/json
 
 {
-    "title": "React TS 3",
+    "title": "React TS 4",
     "description": "React TS",
     "url": "google.com",
     "status": "TO LEARN"
@@ -12,7 +12,7 @@ Content-Type: application/json
 ###
 
 GET  http://localhost:4000/api/posts
-Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDZhZjNjNGJlYzcwZThlZjc5MDIiLCJ1c2VybmFtZSI6Imdlb3JnZTQiLCJpYXQiOjE2Mjk1MjMzNjAsImV4cCI6MTYyOTUyMzY2MH0.hDImB8qqd12MTTnAmaTQyVmc5OZHypJKOGFxpu3BHh0
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTQ2MDk2MiwiZXhwIjoxNjMxNDYyNzYyfQ.n4ZwcMv-2qqgkfRbCif8GXqkFNcgdiucvOunlagFdcs
 
 ###
 PUT  http://localhost:4000/api/posts/61208b0437f69642601e5d41

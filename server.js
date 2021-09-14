@@ -7,6 +7,7 @@ const postRouter = require("./routes/post");
 const newsRouter = require("./routes/news");
 const resizeImageRouter = require("./routes/resizeImage");
 const classificationRouter = require("./routes/classification");
+const blogRouter = require("./routes/blog");
 const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 const cors = require("cors");
@@ -62,6 +63,7 @@ app.use("/api/posts", postRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/resizeImage", resizeImageRouter);
 app.use("/api/classifications", classificationRouter);
+app.use("/api/blogs", blogRouter);
 
 const PORT = process.env.PORT || 4000;
 

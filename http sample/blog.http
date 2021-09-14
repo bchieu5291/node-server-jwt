@@ -1,0 +1,30 @@
+POST  http://localhost:4000/api/blogs
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTYxNDYxNCwiZXhwIjoxNjMxNjE2NDE0fQ.egQmRRy-5dtghDbCr_0Z3oWYQ-Rj1mvkIxVPL8jecwg
+Content-Type: application/json
+
+{
+    "title": "AWS",
+    "description": "AWS desciprtion"
+}
+###
+
+GET  http://localhost:4000/api/blogs
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTYxNDYxNCwiZXhwIjoxNjMxNjE2NDE0fQ.egQmRRy-5dtghDbCr_0Z3oWYQ-Rj1mvkIxVPL8jecwg
+
+###
+GET  http://localhost:4000/api/blogs/613e24aba1b1d50abcdf18c8
+
+
+###
+PUT  http://localhost:4000/api/blogs/613e24aba1b1d50abcdf18c8
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTQ2MDk2MiwiZXhwIjoxNjMxNDYyNzYyfQ.n4ZwcMv-2qqgkfRbCif8GXqkFNcgdiucvOunlagFdcs
+Content-Type: application/json
+
+{
+    "title": "AWS 2",
+    "description": "AWS 2 "
+}
+
+###
+DELETE  http://localhost:4000/api/blogs/613e24aba1b1d50abcdf18c8
+Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTQ2MDk2MiwiZXhwIjoxNjMxNDYyNzYyfQ.n4ZwcMv-2qqgkfRbCif8GXqkFNcgdiucvOunlagFdcs
