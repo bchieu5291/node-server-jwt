@@ -1,23 +1,23 @@
-require("dotenv").config();
-const AWS = require("aws-sdk");
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const s3Storage = require("multer-sharp-s3");
-const crypto = require("crypto");
+require('dotenv').config()
+const AWS = require('aws-sdk')
+const multer = require('multer')
+const multerS3 = require('multer-s3')
+const s3Storage = require('multer-sharp-s3')
+const crypto = require('crypto')
 
 const s3Config = new AWS.S3({
     accessKeyId: process.env.AWS_IAM_USER_KEY,
     secretAccessKey: process.env.AWS_IAM_USER_SECRET,
     Bucket: process.env.AWS_BUCKET_NAME,
-});
+})
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-        cb(null, true);
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true)
     } else {
-        cb(null, false);
+        cb(null, false)
     }
-};
+}
 
 // this is just to test locally if multer is working fine.
 // const storage = multer.diskStorage({
@@ -33,25 +33,25 @@ const storageSharp = s3Storage({
     s3: s3Config,
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: function (req, file, cb) {
-        cb(null, `${file.originalname.replace(".png", "").replace(".jpg", "")}`);
+        cb(null, `${file.originalname.replace('.png', '').replace('.jpg', '')}`)
     },
     // Key: (req, file, cb) => {
     //     crypto.pseudoRandomBytes(16, (err, raw) => {
     //         cb(err, err ? undefined : raw.toString("hex"));
     //     });
     // },
-    ACL: "private",
+    ACL: 'private',
     multiple: true,
     resize: [
         // { suffix: "xlg", width: 1200, height: 1200 },
-        { suffix: "banner", width: 1920, height: 550 },
-        { suffix: "firstNews", width: 1106, height: 514 },
-        { suffix: "restNews", width: 473, height: 220 },
-        { suffix: "detail", width: 1024, height: 573 },
-        { suffix: "related", width: 500, height: 300 },
-        { suffix: "original" },
+        { suffix: 'banner', width: 1920, height: 650 },
+        { suffix: 'firstNews', width: 1106, height: 514 },
+        { suffix: 'restNews', width: 473, height: 220 },
+        { suffix: 'detail', width: 1024, height: 573 },
+        { suffix: 'related', width: 500, height: 300 },
+        { suffix: 'original' },
     ],
-});
+})
 
 // const multerS3Config = multerS3({
 //     s3: s3Config,
@@ -70,6 +70,6 @@ const upload = multer({
     limits: {
         fileSize: 1024 * 1024 * 5, // we are allowing only 5 MB files
     },
-});
+})
 
-exports.resizeImageNews = upload;
+exports.resizeImageNews = upload
