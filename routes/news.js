@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
 //@POST
 //@access private
 router.post('/', profileImage.array('imageFile'), async (req, res) => {
-    const { title, description, url, classifications } = req.body
+    const { title, description, url, classifications, languageId } = req.body
 
     try {
         // console.log("success");
@@ -84,9 +84,13 @@ router.post('/', profileImage.array('imageFile'), async (req, res) => {
 
                 const news = new News({
                     title: {
-                        en_US: title,
+                        en: title,
+                        [languageId]: title,
                     },
-                    description,
+                    description: {
+                        en: description,
+                        [languageId]: description,
+                    },
                     url: url.startsWith('http://') ? url : `http://${url}`,
                     classifications: classifications.split(','),
                     imageFile: item._id,
@@ -120,7 +124,7 @@ router.post('/', profileImage.array('imageFile'), async (req, res) => {
 //@PUT
 //@access private
 router.put('/:id', profileImage.array('imageFile'), async (req, res) => {
-    const { title, description, url, classifications } = req.body
+    const { title, description, url, classifications, languageId } = req.body
 
     const classificationArray = classifications !== '' ? classifications.split(',') : []
     if (!title) {
@@ -145,8 +149,14 @@ router.put('/:id', profileImage.array('imageFile'), async (req, res) => {
                 : []
 
         let updatedNews = {
-            title,
-            description,
+            title: {
+                ...oldNews.title,
+                [languageId]: title,
+            },
+            description: {
+                ...oldNews.description,
+                [languageId]: description,
+            },
         }
 
         if (imageReq) {
