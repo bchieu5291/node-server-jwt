@@ -1,5 +1,6 @@
-const mongoose = require(`mongoose`);
-const Schema = mongoose.Schema;
+const mongoose = require(`mongoose`)
+const Schema = mongoose.Schema
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const BlogSchema = new Schema({
     title: {
@@ -11,12 +12,13 @@ const BlogSchema = new Schema({
     },
     user: {
         type: Schema.Types.ObjectId,
-        ref: "users",
+        ref: 'users',
     },
     createAt: {
         type: Date,
         default: Date.now,
     },
-});
+})
 
-module.exports = mongoose.model("blogs", BlogSchema);
+BlogSchema.plugin(mongoosePaginate)
+module.exports = mongoose.model('blogs', BlogSchema)

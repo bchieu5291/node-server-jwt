@@ -3,6 +3,7 @@ const router = express.Router()
 const verifyToken = require('../middleware/auth')
 
 const Blog = require('../models/blog')
+const { default_limit } = require('../ultilities/constUtil')
 
 //@GET
 //@access private
@@ -21,7 +22,30 @@ router.get('/', verifyToken, async (req, res) => {
 
 router.get('/public', async (req, res) => {
     try {
-        const blogs = await Blog.find().sort({ createAt: 'desc' }).populate('user', ['username'])
+        // const blogs = await Blog.find().sort({ createAt: 'desc' }).populate('user', ['username'])
+
+        const { title, offset, length } = req.query
+
+        var query = {}
+        var payload = {
+            title: title || '',
+        }
+
+        if (payload.title) query.title = { $regex: payload.title }
+
+        var populateOptions = [
+            { path: 'imageFile', select: 'imageUrl' },
+            { path: 'classifications', select: 'title' },
+        ]
+
+        var options = {
+            populate: populateOptions,
+            sort: { createAt: -1 },
+            offset: offset && parseInt(offset) > 0 ? offset : 0,
+            limit: length && parseInt(length) != 0 ? parseInt(length) : default_limit,
+        }
+
+        const blogs = await Blog.paginate(query, options)
 
         res.json({ success: true, blogs: blogs })
     } catch (error) {

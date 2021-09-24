@@ -12,6 +12,11 @@ GET  http://localhost:4000/api/blogs
 Authorization: Baerer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTFmZDVjNDQ2ZTQ1NTczMzhmNTNkYmYiLCJ1c2VybmFtZSI6Imdlb3JnZSIsImlhdCI6MTYzMTYzMTEwNywiZXhwIjoxNjMxNjMyOTA3fQ.jGviVPiLxp4f6RFQxuepx7RIo7HEmvANtqzqchhXi5w
 
 ###
+
+GET  http://localhost:4000/api/blogs/public?offset=0&length=3
+
+
+###
 GET  http://localhost:4000/api/blogs/6140a6b19e08cf1814191cc0
 
 
