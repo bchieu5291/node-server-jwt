@@ -1,17 +1,18 @@
-require("dotenv").config();
-const express = require("express");
-const app = express();
-const verifyToken = require("./middleware/auth");
-const authRouter = require("./routes/authServer");
-const postRouter = require("./routes/post");
-const newsRouter = require("./routes/news");
-const resizeImageRouter = require("./routes/resizeImage");
-const classificationRouter = require("./routes/classification");
-const blogRouter = require("./routes/blog");
-const mongoose = require("mongoose");
-var bodyParser = require("body-parser");
-const cors = require("cors");
-const AWS = require("aws-sdk");
+require('dotenv').config()
+const express = require('express')
+const app = express()
+const verifyToken = require('./middleware/auth')
+const authRouter = require('./routes/authServer')
+const postRouter = require('./routes/post')
+const newsRouter = require('./routes/news')
+const resizeImageRouter = require('./routes/resizeImage')
+const classificationRouter = require('./routes/classification')
+const blogRouter = require('./routes/blog')
+const bookRouter = require('./routes/book')
+const mongoose = require('mongoose')
+var bodyParser = require('body-parser')
+const cors = require('cors')
+const AWS = require('aws-sdk')
 
 const connectDB = async () => {
     try {
@@ -23,48 +24,49 @@ const connectDB = async () => {
                 useUnifiedTopology: true,
                 useFindAndModify: false,
             }
-        );
+        )
 
-        console.log("MongoDB connected");
+        console.log('MongoDB connected')
     } catch (error) {
-        console.log(error);
-        process.exit(1);
+        console.log(error)
+        process.exit(1)
     }
-};
-connectDB();
+}
+connectDB()
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(cors())
 
 //database
 const posts = [
     {
         userId: 1,
-        post: "post henry",
+        post: 'post henry',
     },
     {
         userId: 2,
-        post: "post george",
+        post: 'post george',
     },
-];
+]
 
-app.get("/", (req, res) =>
+app.get('/', (req, res) =>
     res.json(process.env.MONGO_DB_USER ? `${process.env.MONGO_DB_USER}` : "can't get mongoDB")
-);
+)
 
 //app
-app.get("/posts", verifyToken, (req, res) => {
-    res.json(posts.filter((post) => post.userId === req.userId));
-});
+app.get('/posts', verifyToken, (req, res) => {
+    res.json(posts.filter((post) => post.userId === req.userId))
+})
 
-app.use("/api/auth", authRouter);
-app.use("/api/posts", postRouter);
-app.use("/api/news", newsRouter);
-app.use("/api/resizeImage", resizeImageRouter);
-app.use("/api/classifications", classificationRouter);
-app.use("/api/blogs", blogRouter);
+app.use('/api/auth', authRouter)
+app.use('/api/posts', postRouter)
+app.use('/api/news', newsRouter)
+app.use('/api/resizeImage', resizeImageRouter)
+app.use('/api/classifications', classificationRouter)
+app.use('/api/blogs', blogRouter)
+app.use('/api/books', bookRouter)
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4000
 
-app.listen(PORT, () => console.log(`server start on port ${PORT}`));
+app.listen(PORT, () => console.log(`server start on port ${PORT}`))
