@@ -87,4 +87,27 @@ router.post('/', bookImage.single('imageFile'), async (req, res) => {
     }
 })
 
+//@GET
+//@public private
+router.get('/:id', async (req, res) => {
+    try {
+        const findBookCondition = { _id: req.params.id }
+
+        const existBook = await Book.findOne(findBookCondition).populate('imageFile', ['imageUrl'])
+
+        //user not author to update blog
+        if (!existBook) {
+            return res.status(401).json({
+                success: false,
+                message: 'Book not found',
+            })
+        }
+
+        res.json({ success: true, message: 'Successs', book: existBook })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
 module.exports = router
