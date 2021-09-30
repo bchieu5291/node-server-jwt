@@ -68,7 +68,7 @@ router.post('/', bookImage.single('imageFile'), async (req, res) => {
                 en: description,
                 [languageId]: description,
             },
-            url: url.startsWith('http://') ? url : `http://${url}`,
+            url: url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
             imageFile: image._id,
         })
 
@@ -104,6 +104,97 @@ router.get('/:id', async (req, res) => {
         }
 
         res.json({ success: true, message: 'Successs', book: existBook })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
+//@PUT
+//@access private
+router.put('/:id', bookImage.single('imageFile'), async (req, res) => {
+    const { title, description, url, languageId } = req.body
+
+    if (!title) {
+        return res.status(400).json({ success: false, message: 'Title is required' })
+    }
+
+    try {
+        let imageReq = null
+        if (req.file) {
+            imageReq = new Image({
+                name: req.file[0].originalname,
+                imageUrl: `${req.file[0].original.Location}`,
+                extension: req.file[0].original.ContentType,
+                size: req.file[0].size,
+            })
+        }
+
+        const oldNews = await Book.findOne({ _id: req.params.id })
+
+        let updatedBook = {
+            title: {
+                ...oldNews.title,
+                [languageId]: title,
+            },
+            description: {
+                ...oldNews.description,
+                [languageId]: description,
+            },
+            url: url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
+        }
+
+        if (imageReq) {
+            await imageReq.save()
+
+            updatedBook = {
+                ...updatedBook,
+                imageFile: imageReq._id,
+            }
+        }
+
+        updatedBook = {
+            ...updatedBook,
+        }
+
+        const postUpdateCondition = { _id: req.params.id }
+        updatedBook = await Book.findOneAndUpdate(postUpdateCondition, updatedBook, {
+            new: true,
+        })
+
+        //Post not found
+        if (!updatedBook) {
+            return res.status(401).json({ success: false, message: 'Post not found' })
+        }
+
+        const result = await Book.findOne({ _id: updatedBook._id }).populate('imageFile', [
+            'imageUrl',
+        ])
+
+        res.json({ success: true, message: 'Successs', book: result })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
+//@POST
+//@access private
+router.delete('/:id', verifyToken, async (req, res) => {
+    try {
+        const postdDeleteCondition = { _id: req.params.id }
+
+        const deletedBook = await Book.findOneAndDelete(postdDeleteCondition)
+
+        //user not author to update post
+        if (!deletedBook) {
+            return res.status(401).json({
+                success: false,
+                message: 'Book not found || not authorize',
+            })
+        }
+
+        res.json({ success: true, message: 'Successs', book: deletedBook })
     } catch (error) {
         console.log(error)
         return res.status(400).json({ success: false, message: 'General error' })

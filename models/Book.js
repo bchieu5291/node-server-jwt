@@ -17,6 +17,10 @@ const BookSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'image',
     },
+    type: {
+        type: String,
+        default: 'book',
+    },
     createAt: {
         type: Date,
         default: Date.now,

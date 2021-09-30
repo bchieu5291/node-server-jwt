@@ -9,6 +9,7 @@ const resizeImageRouter = require('./routes/resizeImage')
 const classificationRouter = require('./routes/classification')
 const blogRouter = require('./routes/blog')
 const bookRouter = require('./routes/book')
+const contactUsRouter = require('./routes/contactUs')
 const mongoose = require('mongoose')
 var bodyParser = require('body-parser')
 const cors = require('cors')
@@ -66,6 +67,7 @@ app.use('/api/resizeImage', resizeImageRouter)
 app.use('/api/classifications', classificationRouter)
 app.use('/api/blogs', blogRouter)
 app.use('/api/books', bookRouter)
+app.use('/api/contactUs', contactUsRouter)
 
 const PORT = process.env.PORT || 4000
 

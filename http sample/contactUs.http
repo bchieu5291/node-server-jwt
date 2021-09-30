@@ -1,0 +1,8 @@
+POST  http://localhost:4000/api/contactUs
+Content-Type: application/json
+
+{
+    "email": "test@gmail.com",
+    "title": "React TS 4",
+    "message": "React TS"        
+}
