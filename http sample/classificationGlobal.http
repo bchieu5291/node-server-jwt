@@ -1,0 +1,12 @@
+
+GET  http://localhost:4000/api/classificationGlobal?type=book
+
+###
+POST  http://localhost:4000/api/classificationGlobal
+Content-Type: application/json
+
+{
+    "title": "novel",
+    "type": "book"
+}
+

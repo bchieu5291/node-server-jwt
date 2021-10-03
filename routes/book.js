@@ -7,6 +7,7 @@ var path = require('path')
 var multer = require('multer')
 const Book = require('../models/Book')
 const Image = require('../models/Image')
+const DocumentFile = require('../models/DocumentFile')
 
 const { bookImage } = require('../awss3/bookImageUpload')
 const { default_limit } = require('../ultilities/constUtil')
@@ -23,7 +24,11 @@ router.get('/', async (req, res) => {
         }
         if (payload.title) query.title = { $regex: payload.title }
 
-        var populateOptions = [{ path: 'imageFile', select: 'imageUrl' }]
+        var populateOptions = [
+            { path: 'imageFile', select: 'imageUrl' },
+            { path: 'bookFile', select: 'fileUrl' },
+            { path: 'classifications', select: 'title' },
+        ]
 
         var options = {
             populate: populateOptions,
@@ -43,49 +48,68 @@ router.get('/', async (req, res) => {
 
 //@POST
 //@access private
-router.post('/', bookImage.single('imageFile'), async (req, res) => {
-    const { title, description, url, languageId } = req.body
+router.post(
+    '/',
+    bookImage.fields([{ name: 'imageFile' }, { name: 'bookFile' }]),
+    async (req, res) => {
+        const { title, description, url, classifications, languageId } = req.body
 
-    try {
-        // console.log("success");
-        // console.log(req.file);
+        try {
+            // console.log("success");
+            // console.log(req.file);
 
-        var imageModel = new Image({
-            name: req.file.originalname,
-            imageUrl: `${req.file.original.Location}`,
-            extension: req.file.original.ContentType,
-            size: req.file.size,
-        })
+            const imageFile = req.files['imageFile'][0]
+            var imageModel = new Image({
+                name: imageFile.originalname,
+                imageUrl: `${imageFile.original.Location}`,
+                extension: imageFile.original.ContentType,
+                size: imageFile.original.size,
+            })
+            const image = await imageModel.save()
 
-        const image = await imageModel.save()
+            const bookFile = req.files['bookFile'][0]
+            var documentFileModel = new DocumentFile({
+                name: bookFile.originalname,
+                fileUrl: `${bookFile.Location}`,
+                extension: bookFile.ContentType,
+                size: bookFile.size,
+            })
+            const documentFile = await documentFileModel.save()
 
-        const book = new Book({
-            title: {
-                en: title,
-                [languageId]: title,
-            },
-            description: {
-                en: description,
-                [languageId]: description,
-            },
-            url: url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
-            imageFile: image._id,
-        })
+            const book = new Book({
+                title: {
+                    en: title,
+                    [languageId]: title,
+                },
+                description: {
+                    en: description,
+                    [languageId]: description,
+                },
+                url:
+                    url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
+                imageFile: image._id,
+                classifications: classifications.split(','),
+                bookFile: documentFile._id,
+            })
 
-        await book.save()
+            await book.save()
 
-        const result = await Book.findOne({ _id: book._id }).populate('imageFile', ['imageUrl'])
+            const result = await Book.findOne({ _id: book._id })
+                .populate('imageFile', ['imageUrl'])
+                .populate('bookFile', ['fileUrl'])
+                .populate('classifications', ['title'])
 
-        res.json({
-            success: true,
-            message: 'Successs',
-            book: result,
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(400).json({ success: false, message: 'General error' })
+            res.json({
+                success: true,
+                message: 'Successs',
+                book: result,
+            })
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ success: false, message: 'General error' })
+        }
     }
-})
+)
 
 //@GET
 //@public private
@@ -93,7 +117,11 @@ router.get('/:id', async (req, res) => {
     try {
         const findBookCondition = { _id: req.params.id }
 
-        const existBook = await Book.findOne(findBookCondition).populate('imageFile', ['imageUrl'])
+        const existBook = await Book.findOne(findBookCondition).populate('imageFile', [
+            'imageUrl',
+            'extension',
+            'size',
+        ])
 
         //user not author to update blog
         if (!existBook) {
@@ -112,71 +140,99 @@ router.get('/:id', async (req, res) => {
 
 //@PUT
 //@access private
-router.put('/:id', bookImage.single('imageFile'), async (req, res) => {
-    const { title, description, url, languageId } = req.body
+router.put(
+    '/:id',
+    bookImage.fields([{ name: 'imageFile' }, { name: 'bookFile' }]),
+    async (req, res) => {
+        const { title, description, url, classifications, languageId } = req.body
+        const classificationArray = classifications !== '' ? classifications.split(',') : []
 
-    if (!title) {
-        return res.status(400).json({ success: false, message: 'Title is required' })
-    }
-
-    try {
-        let imageReq = null
-        if (req.file) {
-            imageReq = new Image({
-                name: req.file[0].originalname,
-                imageUrl: `${req.file[0].original.Location}`,
-                extension: req.file[0].original.ContentType,
-                size: req.file[0].size,
-            })
+        if (!title) {
+            return res.status(400).json({ success: false, message: 'Title is required' })
         }
 
-        const oldNews = await Book.findOne({ _id: req.params.id })
+        try {
+            let imageReq = null
+            if (req.files['imageFile'] && req.files['imageFile'][0]) {
+                const imageFile = req.files['imageFile'][0]
+                imageReq = new Image({
+                    name: imageFile.originalname,
+                    imageUrl: `${imageFile.original.Location}`,
+                    extension: imageFile.original.ContentType,
+                    size: imageFile.original.size,
+                })
 
-        let updatedBook = {
-            title: {
-                ...oldNews.title,
-                [languageId]: title,
-            },
-            description: {
-                ...oldNews.description,
-                [languageId]: description,
-            },
-            url: url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
-        }
+                await imageReq.save()
+            }
 
-        if (imageReq) {
-            await imageReq.save()
+            let bookModel = null
+            if (req.files['bookFile'] && req.files['bookFile'][0]) {
+                const bookFile = req.files['bookFile'][0]
+                bookModel = new DocumentFile({
+                    name: bookFile.originalname,
+                    fileUrl: `${bookFile.Location}`,
+                    extension: bookFile.ContentType,
+                    size: bookFile.size,
+                })
+                await bookModel.save()
+            }
+
+            const oldNews = await Book.findOne({ _id: req.params.id })
+
+            let updatedBook = {
+                title: {
+                    ...oldNews.title,
+                    [languageId]: title,
+                },
+                description: {
+                    ...oldNews.description,
+                    [languageId]: description,
+                },
+                url:
+                    url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`,
+                classifications: classificationArray,
+            }
+
+            if (imageReq) {
+                updatedBook = {
+                    ...updatedBook,
+                    imageFile: imageReq._id,
+                }
+            }
+
+            if (bookModel) {
+                updatedBook = {
+                    ...updatedBook,
+                    bookFile: bookModel._id,
+                }
+            }
 
             updatedBook = {
                 ...updatedBook,
-                imageFile: imageReq._id,
             }
+
+            const postUpdateCondition = { _id: req.params.id }
+            updatedBook = await Book.findOneAndUpdate(postUpdateCondition, updatedBook, {
+                new: true,
+            })
+
+            //Post not found
+            if (!updatedBook) {
+                return res.status(401).json({ success: false, message: 'Post not found' })
+            }
+
+            const result = await Book.findOne({ _id: updatedBook._id })
+                .populate('imageFile', ['imageUrl'])
+                .populate('bookFile', ['fileUrl'])
+                .populate('classifications', ['title'])
+
+            res.json({ success: true, message: 'Successs', book: result })
+        } catch (error) {
+            console.log(error)
+            return res.status(400).json({ success: false, message: 'General error' })
         }
-
-        updatedBook = {
-            ...updatedBook,
-        }
-
-        const postUpdateCondition = { _id: req.params.id }
-        updatedBook = await Book.findOneAndUpdate(postUpdateCondition, updatedBook, {
-            new: true,
-        })
-
-        //Post not found
-        if (!updatedBook) {
-            return res.status(401).json({ success: false, message: 'Post not found' })
-        }
-
-        const result = await Book.findOne({ _id: updatedBook._id }).populate('imageFile', [
-            'imageUrl',
-        ])
-
-        res.json({ success: true, message: 'Successs', book: result })
-    } catch (error) {
-        console.log(error)
-        return res.status(400).json({ success: false, message: 'General error' })
     }
-})
+)
 
 //@POST
 //@access private

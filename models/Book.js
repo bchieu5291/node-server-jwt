@@ -17,6 +17,11 @@ const BookSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'image',
     },
+    bookFile: {
+        type: Schema.Types.ObjectId,
+        ref: 'documentFile',
+    },
+    classifications: [{ type: mongoose.Types.ObjectId, ref: 'classificationGlobal' }],
     type: {
         type: String,
         default: 'book',

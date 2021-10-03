@@ -12,10 +12,18 @@ const s3Config = new AWS.S3({
 })
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-        cb(null, true)
+    if (file.fieldname === 'imageFile') {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, true)
+        } else {
+            cb(null, false)
+        }
     } else {
-        cb(null, false)
+        if (file.mimetype === 'application/pdf' || file.mimetype === 'application/epub') {
+            cb(null, true)
+        } else {
+            cb(null, false)
+        }
     }
 }
 
@@ -36,9 +44,15 @@ const storageSharp = s3Storage({
     //     cb(null, `400_400/${new Date().toISOString()}-${file.originalname}_400x400`);
     // },
     Key: (req, file, cb) => {
-        crypto.pseudoRandomBytes(16, (err, raw) => {
-            cb(err, err ? undefined : `bookImage/${raw.toString('hex')}`)
-        })
+        if (file.fieldname === 'imageFile') {
+            crypto.pseudoRandomBytes(16, (err, raw) => {
+                cb(err, err ? undefined : `bookImage/${raw.toString('hex')}`)
+            })
+        } else {
+            crypto.pseudoRandomBytes(16, (err, raw) => {
+                cb(err, err ? undefined : `bookFile/${file.originalname}`)
+            })
+        }
     },
     ACL: 'private',
     multiple: true,
@@ -65,7 +79,7 @@ const upload = multer({
     storage: storageSharp,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 1024 * 1024 * 5, // we are allowing only 5 MB files
+        fileSize: 1024 * 1024 * 20, // we are allowing only 5 MB files
     },
 })
 
