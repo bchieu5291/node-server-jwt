@@ -12,14 +12,13 @@ const blogRouter = require('./routes/blog')
 const bookRouter = require('./routes/book')
 const contactUsRouter = require('./routes/contactUs')
 const mongoose = require('mongoose')
-var bodyParser = require('body-parser')
 const cors = require('cors')
 const AWS = require('aws-sdk')
 
 const connectDB = async () => {
     try {
         await mongoose.connect(
-            `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@mern-george.ohcow.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+            `mongodb://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@mern-george-shard-00-00.ohcow.mongodb.net:27017,mern-george-shard-00-01.ohcow.mongodb.net:27017,mern-george-shard-00-02.ohcow.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-uu9a3w-shard-0&authSource=admin&retryWrites=true&w=majority`,
             {
                 useCreateIndex: true,
                 useNewUrlParser: true,
@@ -39,18 +38,6 @@ connectDB()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors())
-
-//database
-const posts = [
-    {
-        userId: 1,
-        post: 'post henry',
-    },
-    {
-        userId: 2,
-        post: 'post george',
-    },
-]
 
 app.get('/', (req, res) =>
     res.json(process.env.MONGO_DB_USER ? `${process.env.MONGO_DB_USER}` : "can't get mongoDB")

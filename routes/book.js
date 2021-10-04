@@ -3,11 +3,13 @@ const router = express.Router()
 const verifyToken = require('../middleware/auth')
 var fs = require('fs')
 var path = require('path')
+const mongoose = require('mongoose')
 
 var multer = require('multer')
 const Book = require('../models/Book')
 const Image = require('../models/Image')
 const DocumentFile = require('../models/DocumentFile')
+const ClassificationGlobal = require('../models/ClassificationGlobal')
 
 const { bookImage } = require('../awss3/bookImageUpload')
 const { default_limit } = require('../ultilities/constUtil')
@@ -16,13 +18,15 @@ const { default_limit } = require('../ultilities/constUtil')
 //@access private
 router.get('/', async (req, res) => {
     try {
-        const { title, offset, length } = req.query
+        const { title, classifications, offset, length, languageId } = req.query
 
-        var query = {}
         var payload = {
             title: title || '',
+            classifications: classifications
+                ? classifications.split(',').map(mongoose.Types.ObjectId)
+                : null,
+            languageId: languageId || 'en',
         }
-        if (payload.title) query.title = { $regex: payload.title }
 
         var populateOptions = [
             { path: 'imageFile', select: 'imageUrl' },
@@ -31,15 +35,56 @@ router.get('/', async (req, res) => {
         ]
 
         var options = {
-            populate: populateOptions,
             sort: { createAt: -1 },
             offset: offset && parseInt(offset) > 0 ? offset : 0,
             limit: length && parseInt(length) != 0 ? parseInt(length) : default_limit,
         }
 
-        const books = await Book.paginate(query, options)
+        var aggregateOption = [
+            { $unwind: '$title' },
+            { $match: { 'title.en': { $regex: payload.title } } },
+        ]
+
+        if (payload.classifications) {
+            aggregateOption = [
+                ...aggregateOption,
+                { $match: { classifications: { $in: payload.classifications } } },
+            ]
+        }
+
+        var aggregate = Book.aggregate(aggregateOption)
+
+        let books = await Book.aggregatePaginate(aggregate, options)
+
+        books.docs = await Book.populate(books.docs, populateOptions)
 
         res.json({ success: true, books: books })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
+router.get('/listing4home', async (req, res) => {
+    try {
+        const bookClassification = await ClassificationGlobal.find({ type: 'book' })
+        let result = []
+
+        for (let i = 0; i < bookClassification.length; i++) {
+            const item = bookClassification[i]
+            const booksByType = await Book.find({ classifications: item._id })
+                .populate('imageFile', ['imageUrl'])
+                .populate('bookFile', ['fileUrl'])
+                .populate('classifications', ['title'])
+
+            const bookByTypeModel = {
+                type: item.title,
+                books: booksByType,
+            }
+            result.push(bookByTypeModel)
+        }
+
+        res.json({ success: true, data: result })
     } catch (error) {
         console.log(error)
         return res.status(400).json({ success: false, message: 'General error' })
@@ -117,11 +162,10 @@ router.get('/:id', async (req, res) => {
     try {
         const findBookCondition = { _id: req.params.id }
 
-        const existBook = await Book.findOne(findBookCondition).populate('imageFile', [
-            'imageUrl',
-            'extension',
-            'size',
-        ])
+        const existBook = await Book.findOne(findBookCondition)
+            .populate('imageFile', ['imageUrl'])
+            .populate('bookFile', ['fileUrl'])
+            .populate('classifications', ['title'])
 
         //user not author to update blog
         if (!existBook) {
