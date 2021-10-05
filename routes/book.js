@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
         const { title, classifications, offset, length, languageId } = req.query
 
         var payload = {
-            title: title || '',
+            title: title?.toLocaleLowerCase() || '',
             classifications: classifications
                 ? classifications.split(',').map(mongoose.Types.ObjectId)
                 : null,
