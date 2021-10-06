@@ -1,7 +1,7 @@
-GET  http://localhost:4000/api/books?title=&classifications=6159dcc6f7d0f4414c867525
+GET  http://localhost:4000/api/books?title=&classifications=
 
 ###
-GET  http://localhost:4000/api/books?title=dore
+GET  http://localhost:4000/api/books?title=quynh
 
 ###
 GET  http://localhost:4000/api/books/listing4home

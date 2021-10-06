@@ -6,7 +6,7 @@ POST  http://localhost:4000/api/classificationGlobal
 Content-Type: application/json
 
 {
-    "title": "novel",
+    "title": "Funny",
     "type": "book"
 }
 

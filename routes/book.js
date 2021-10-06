@@ -13,6 +13,7 @@ const ClassificationGlobal = require('../models/ClassificationGlobal')
 
 const { bookImage } = require('../awss3/bookImageUpload')
 const { default_limit } = require('../ultilities/constUtil')
+const { diacriticSensitiveRegex } = require('../ultilities/helper')
 
 //@GET
 //@access private
@@ -21,7 +22,7 @@ router.get('/', async (req, res) => {
         const { title, classifications, offset, length, languageId } = req.query
 
         var payload = {
-            title: title?.toLocaleLowerCase() || '',
+            title: title || '',
             classifications: classifications
                 ? classifications.split(',').map(mongoose.Types.ObjectId)
                 : null,
@@ -42,7 +43,11 @@ router.get('/', async (req, res) => {
 
         var aggregateOption = [
             { $unwind: '$title' },
-            { $match: { 'title.en': { $regex: payload.title } } },
+            {
+                $match: {
+                    'title.en': { $regex: new RegExp(diacriticSensitiveRegex(payload.title), 'i') },
+                },
+            },
         ]
 
         if (payload.classifications) {
