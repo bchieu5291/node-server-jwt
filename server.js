@@ -11,6 +11,7 @@ const classificationGlobalRouter = require('./routes/classificationGlobal')
 const blogRouter = require('./routes/blog')
 const bookRouter = require('./routes/book')
 const contactUsRouter = require('./routes/contactUs')
+const userRouter = require('./routes/user')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const AWS = require('aws-sdk')
@@ -57,6 +58,7 @@ app.use('/api/classificationGlobal', classificationGlobalRouter)
 app.use('/api/blogs', blogRouter)
 app.use('/api/books', bookRouter)
 app.use('/api/contactUs', contactUsRouter)
+app.use('/api/users', userRouter)
 
 const PORT = process.env.PORT || 4000
 
