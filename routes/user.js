@@ -8,7 +8,7 @@ const User = require('../models/User')
 //@access private
 router.get('/', verifyAdminToken, async (req, res) => {
     try {
-        const users = await User.find().select(['username', 'createAt'])
+        const users = await User.find().select(['username', 'roles', 'createAt'])
         res.json({ success: true, data: users })
     } catch (error) {
         console.log(error)
