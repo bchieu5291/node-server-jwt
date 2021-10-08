@@ -14,6 +14,7 @@ const Image = require('../models/Image')
 const { profileImage } = require('../awss3/upload')
 const classification = require('../models/classification')
 const { default_limit } = require('../ultilities/constUtil')
+const { deleteS3FileWithPrefix } = require('../ultilities/helper')
 
 // var storage = multer.diskStorage({
 //     destination: "./uploads",
@@ -211,6 +212,12 @@ router.delete('/:id', verifyToken, async (req, res) => {
             { _id: deletedNews.classifications },
             { $pull: { news: deletedNews._id } }
         )
+
+        if (deletedNews.imageFile?._id) {
+            const deleteImage = await Image.findOneAndDelete({ _id: deletedNews.imageFile._id })
+            const prefixImageFileName = deleteImage.imageUrl.split('/').pop().split('-')[0]
+            await deleteS3FileWithPrefix(prefixImageFileName)
+        }
 
         // //user not author to update post
         // if (!deletedPost) {

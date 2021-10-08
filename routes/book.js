@@ -13,7 +13,11 @@ const ClassificationGlobal = require('../models/ClassificationGlobal')
 
 const { bookImage } = require('../awss3/bookImageUpload')
 const { default_limit } = require('../ultilities/constUtil')
-const { diacriticSensitiveRegex } = require('../ultilities/helper')
+const {
+    diacriticSensitiveRegex,
+    deleteS3FileWithPrefix,
+    deleteS3File,
+} = require('../ultilities/helper')
 
 //@GET
 //@access private
@@ -297,6 +301,20 @@ router.delete('/:id', verifyToken, async (req, res) => {
                 success: false,
                 message: 'Book not found || not authorize',
             })
+        }
+
+        if (deletedBook.imageFile?._id) {
+            const deleteImage = await Image.findOneAndDelete({ _id: deletedBook.imageFile._id })
+            const prefixImageFileName = deleteImage.imageUrl.split('/').pop().split('-')[0]
+            await deleteS3FileWithPrefix(prefixImageFileName)
+        }
+
+        if (deletedBook.bookFile?._id) {
+            const deleteBookFile = await DocumentFile.findOneAndDelete({
+                _id: deletedBook.bookFile._id,
+            })
+            const bookFileName = deleteBookFile.name
+            await deleteS3File(bookFileName)
         }
 
         res.json({ success: true, message: 'Successs', book: deletedBook })
