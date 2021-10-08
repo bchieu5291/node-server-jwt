@@ -1,12 +1,12 @@
 const express = require('express')
+const { verifyAdminToken } = require('../middleware/customAuth')
 const router = express.Router()
-const verifyToken = require('../middleware/auth')
 
 const User = require('../models/User')
 
 //@GET
 //@access private
-router.get('/', async (req, res) => {
+router.get('/', verifyAdminToken, async (req, res) => {
     try {
         const users = await User.find().select(['username', 'createAt'])
         res.json({ success: true, data: users })

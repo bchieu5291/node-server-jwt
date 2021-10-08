@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken')
-const verifyToken = (req, res, next) => {
+const Role = require('../ultilities/role')
+
+const verifyAdminToken = (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1]
     if (!token) {
         return res.sendStatus(401)
@@ -8,7 +10,9 @@ const verifyToken = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         console.log(decoded)
 
-        req.userId = decoded._id
+        if (!decoded.roles || decoded.roles !== Role.Admin) {
+            return res.sendStatus(403)
+        }
 
         next()
     } catch (error) {
@@ -17,4 +21,6 @@ const verifyToken = (req, res, next) => {
     }
 }
 
-module.exports = verifyToken
+module.exports = {
+    verifyAdminToken,
+}
