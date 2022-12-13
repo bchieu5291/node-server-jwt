@@ -15,6 +15,9 @@ const userRouter = require('./routes/user')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const AWS = require('aws-sdk')
+const nodeCron = require('node-cron')
+const { mailService } = require('./services/cronJobService')
+
 
 const connectDB = async () => {
     try {
@@ -47,6 +50,12 @@ app.get('/', (req, res) =>
 //app
 app.get('/posts', verifyToken, (req, res) => {
     res.json(posts.filter((post) => post.userId === req.userId))
+})
+
+nodeCron.schedule("25 17 * * *", function () {
+    mailService()
+    console.log('---------------------')
+    console.log(`start cronjob at ${cronjob}`)
 })
 
 app.use('/api/auth', authRouter)

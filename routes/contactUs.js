@@ -4,6 +4,10 @@ const verifyToken = require('../middleware/auth')
 var fs = require('fs')
 var path = require('path')
 const nodemailer = require('nodemailer')
+const {
+    mailService, startCronJob
+} = require('../services/cronJobService')
+
 
 const transporter = nodemailer.createTransport({
     port: 465,
@@ -39,6 +43,42 @@ router.post('/', async (req, res) => {
             success: true,
             message: 'Successs',
             result: sendEmaiLResult,
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
+router.post('/test-mail-service', async (req, res) => {    
+
+    try {
+        await mailService();
+
+        res.json({
+            success: true,
+            message: 'Successs',
+            result: "",
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: 'General error' })
+    }
+})
+
+router.post('/start-cronjob', async (req, res) => {    
+    const { cronJob} = req.body
+    if (!cronJob) {
+        return res.status(400).json({ success: false, message: 'Invalid Params' })
+    }
+
+    try {
+        await startCronJob(cronJob);
+
+        res.json({
+            success: true,
+            message: 'Successs',
+            result: "",
         })
     } catch (error) {
         console.log(error)

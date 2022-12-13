@@ -5,6 +5,7 @@
     "main": "server.js",
     "scripts": {
         "server": "nodemon server",
+        "server:prod": "nodemon server port 4001",
         "auth": "nodemon authServer",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -32,6 +33,7 @@
         "multer": "^1.4.3",
         "multer-s3": "^2.9.0",
         "multer-sharp-s3": "^0.2.1",
+        "node-cron": "^3.0.2",
         "nodemailer": "^6.6.5",
         "request": "^2.88.2",
         "request-promise": "^4.2.6"
